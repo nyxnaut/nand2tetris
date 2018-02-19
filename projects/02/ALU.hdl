@@ -42,5 +42,45 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+
+	// logic for negating and zeroing x and y
+	Not16(in=x, out=notx);
+	Not16(in=y, out=noty);
+	Mux4Way16(
+		sel[0]=zx,
+		sel[1]=nx,
+		a=x,
+		b=false,
+		c=notx,
+		d=true,
+		out=xVal);
+	Mux4Way16(
+		sel[0]=zy,
+		sel[1]=ny,
+		a=y,
+		b=false,
+		c=noty,
+		d=true,
+		out=yVal);
+
+	// logic for processing f and no bits
+	And16(a=xVal, b=yVal, out=andxy);
+	Add16(a=xVal, b=yVal, out=addxy);
+	Not16(in=andxy, out=nandxy);
+	Not16(in=addxy, out=naddxy);
+	Mux4Way16(
+		sel[0]=f,
+		sel[1]=no,
+		a=andxy,
+		b=addxy,
+		c=nandxy,
+		d=naddxy,
+		out=out,
+		out=checkIsZero,
+		out[15]=ng
+	);
+
+	//Nor16Way for zr output
+	Or16Way(in=checkIsZero, out=nzr);
+	Not(in=nzr, out=zr);
 }
