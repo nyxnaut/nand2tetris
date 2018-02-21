@@ -15,6 +15,22 @@ CHIP PC {
     IN in[16],load,inc,reset;
     OUT out[16];
 
-    PARTS:
-    // Put your code here:
+    PARTS: 
+	// Set up to use 1 bit to select between load and increment
+	// it doesn't matter that the mux always selects between these and reset
+	// because of the registry load bit
+
+	// 1 for inc, 0 for load. Load is selected if both bits are for some odd reason
+	// on at the same time. Looking at you clock cycle 9 in the test script...
+	Not(in=load, out=nload);
+	And(a=nload, b=inc, out=sel0);
+
+	Add16(a=toAdd, b[0]=true, out=addOne);
+	Mux4Way16(sel[0]=sel0, sel[1]=reset, a=in, b=addOne,  out=toReg);
+
+	// Register should be loaded if any control bit is 1
+	Or(a=load, b=reset, out=or1);
+	Or(a=or1, b=inc, out=regLoad);
+
+	Register(in=toReg, load=regLoad, out=out, out=toAdd);
 }
