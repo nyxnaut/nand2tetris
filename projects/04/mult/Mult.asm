@@ -6,4 +6,38 @@
 // Multiplies R0 and R1 and stores the result in R2.
 // (R0, R1, R2 refer to RAM[0], RAM[1], and RAM[2], respectively.)
 
-// Put your code here.
+
+//intialize R2 to zero
+@0
+D=A
+@R2
+M=D
+
+// Check if either R0 or R1 are 0 and jump to end if they are
+@R0
+D=M
+@END
+D;JEQ
+
+@R1
+D=M
+@END
+D;JEQ
+
+
+(LOOP)
+	@R0
+	D=M
+	@R2
+	M=D+M
+	@R1
+	M=M-1
+	@R1
+	D=M
+	@END
+	D;JEQ
+	@LOOP
+	0;JMP
+(END)
+@END
+0;JMP
