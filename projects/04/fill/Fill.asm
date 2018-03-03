@@ -11,4 +11,59 @@
 // "white" in every pixel;
 // the screen should remain fully clear as long as no key is pressed.
 
-// Put your code here.
+// read keyboard input
+// which key is pressed is determined by the word at @KBD
+
+// intialize keyboard to zero on start
+D=0
+@KBD
+M=D
+
+//create a pointer to the current screen position (starts at @SCREEN)
+@SCREEN
+D=A
+@sptr
+M=D
+
+(WAITING)
+	// loop till keyboard input then jump to FILL
+	@KBD
+	D=M
+	@CHECK
+	D;JEQ
+	@FILL
+	0;JMP
+(CHECK)
+	@sptr
+	D=M
+	@screen
+	D=D-A
+	@EMPTY
+	D;JGE
+	@WAITING
+	0;JMP
+(FILL) // TODO: check if has reached end of screen memory
+	@sptr
+	A=M
+	M=-1
+	D=A+1
+	@sptr
+	M=D
+	@WAITING
+	0;JMP
+
+(EMPTY)
+	@sptr
+	D=M
+	@SCREEN
+	D=D-A;
+	@WAITING
+	D;JEQ
+	@sptr
+	A=M
+	M=0
+	D=A-1
+	@sptr
+	M=D
+	@WAITING
+	0;JMP
