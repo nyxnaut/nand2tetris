@@ -39,5 +39,58 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+	// Outputs to A, D, & M
+	// Each locations conditional load bit is written next to its
+	// implementation, with Memory just below A (as A determines its address)
+	ALU(x=outD, y=muxAM,
+		zx=instruction[11],
+		nx=instruction[10],
+		zy=instruction[9],
+		ny=instruction[8],
+		f=instruction[7],
+		no=instruction[6], 
+		zr=zr, ng=ng,
+		out=outALU, out=outM);
+
+	// A Register
+	// If A instruction, loads instruction as value. Otherwise if the
+	// A register load bit is set in the C instruction, loads ALU output
+	// Also provides the memory address for ALU output (to be loaded
+	// if the writeM bit is set)
+	Mux16(a=instruction, b=outALU, sel=instruction[15], out=inA);
+	And(a=instruction[15], b=instruction[5], out=cLoadA);
+	Not(in=instruction[15], out=aInstruction);
+	Or(a=cLoadA, b=aInstruction, out=loadA);
+	ARegister(in=inA, load=loadA, out=outA, out[0..14]=addressM);
+
+	// Write to Memory
+	// Writes ALU output to address stored in A if
+	// C instruction M load bit is set (see also ALU and A register)
+	And(a=instruction[15], b=instruction[3], out=writeM);
+
+	// D Register
+	// Load occurs if C instruction with D register bit set
+	And(a=instruction[15], b=instruction[4], out=loadD);
+	DRegister(in=outALU, load=loadD, out=outD);
+
+	// ALU Mux
+	// Defaults to passing A register output into ALU unless it's a
+	// c instruction with the a bit set
+	And(a=instruction[12], b=instruction[15], out=loadM);
+	Mux16(a=outA, b=inM, sel=loadM, out=muxAM);
+
+	// Program Counter
+	// Load logic checks all the jump conditions against
+	// ALU zr and ng (zero, negative) output bits
+	// The pc increments unless there is a jump operation
+	Or(a=zr, b=ng, out=nps);
+	Not(in=nps, out=ps);
+	And(a=instruction[0], b=ps, out=gt);
+	And(a=instruction[1], b=zr, out=eq);
+	And(a=instruction[2], b=ng, out=lt);
+	Or(a=gt, b=eq, out=get);
+	Or(a=get, b=lt, out=jmpBit);
+	And(a=jmpBit, b=instruction[15], out=loadPC);
+	Not(in=loadPC, out=incPC);
+	PC(in=outA, inc=incPC, load=loadPC, reset=reset, out[0..14]=pc);
 }
