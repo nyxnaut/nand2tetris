@@ -42,7 +42,13 @@ M=D
 	D;JGE
 	@WAITING
 	0;JMP
-(FILL) // TODO: check if has reached end of screen memory
+(FILL)
+	@sptr
+	D=M
+	@KBD
+	D=D-A
+	@WAITING
+	D;JEQ
 	@sptr
 	A=M
 	M=-1
@@ -60,9 +66,9 @@ M=D
 	@WAITING
 	D;JEQ
 	@sptr
-	A=M
+	A=M-1
 	M=0
-	D=A-1
+	D=A
 	@sptr
 	M=D
 	@WAITING
