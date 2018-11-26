@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# doesn't work yet because, well, I'm bad at bash =(
+
 PROGRAM=$1
 if [ ${PROGRAM: -4} != ".java" ]
 then
